@@ -17,93 +17,132 @@ static bool g_print_step = false;
 
 void device_update();
 
-static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
-#ifdef CONFIG_ITRACE_COND
-  if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
+static void trace_and_difftest(Decode *_this, vaddr_t dnpc)
+{
+#ifdef CONFIG_ITRACE_COND // CONFIG_ITRACE_COND=true
+  if (ITRACE_COND)        // true
+  {
+    printf("hsay:ITRACE_COND=true\n"); // hamza
+    log_write("%s\n", _this->logbuf);
+  }
 #endif
-  if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); }
-  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc));
+  if (g_print_step) // 运行次数n<10的话为true
+  {
+    printf("hsay:g_print_step=true\n");        // hamza
+    IFDEF(CONFIG_ITRACE, puts(_this->logbuf)); // CONFIG_ITRACE=true//puts()把字符串输入到stdout
+  }
+  IFDEF(CONFIG_DIFFTEST, difftest_step(_this->pc, dnpc)); // CONFIG_DIFFTEST=false//暂时不管
 }
 
-static void exec_once(Decode *s, vaddr_t pc) {
-  s->pc = pc;
+static void exec_once(Decode *s, vaddr_t pc)
+{
+  printf("hsay:in exec_once()\n"); // hamza
+  s->pc = pc;                      // TODO:pc好像还没有赋值？
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
-#ifdef CONFIG_ITRACE
+#ifdef CONFIG_ITRACE //#define CONFIG_ITRACE 1
   char *p = s->logbuf;
-  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc);
+  p += snprintf(p, sizeof(s->logbuf), FMT_WORD ":", s->pc); // snprintf()把s->pc写到p，返回值为欲写入长度
   int ilen = s->snpc - s->pc;
   int i;
   uint8_t *inst = (uint8_t *)&s->isa.inst.val;
-  for (i = ilen - 1; i >= 0; i --) {
+  for (i = ilen - 1; i >= 0; i--)
+  {
     p += snprintf(p, 4, " %02x", inst[i]);
   }
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
   int space_len = ilen_max - ilen;
-  if (space_len < 0) space_len = 0;
+  if (space_len < 0)
+    space_len = 0;
   space_len = space_len * 3 + 1;
   memset(p, ' ', space_len);
   p += space_len;
 
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
-      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
+              MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
 #endif
 }
 
-static void execute(uint64_t n) {
-  Decode s;
-  for (;n > 0; n --) {
-    exec_once(&s, cpu.pc);
-    g_nr_guest_inst ++;
-    trace_and_difftest(&s, cpu.pc);
-    if (nemu_state.state != NEMU_RUNNING) break;
-    IFDEF(CONFIG_DEVICE, device_update());
+static void execute(uint64_t n)
+{
+  printf("hsay:in execute()\n"); // hamza
+  Decode s;                      // PC相关的结构体
+  for (; n > 0; n--)
+  {
+    exec_once(&s, cpu.pc);          //执行一次指令//传入空的s和cpu.pc
+    g_nr_guest_inst++;              //执行指令数，在statistic()统计函数中需要用到
+    trace_and_difftest(&s, cpu.pc); //打印一些log
+    if (nemu_state.state != NEMU_RUNNING)
+      break;
+    IFDEF(CONFIG_DEVICE, device_update()); //更新时间和状态(quit)
   }
 }
 
-static void statistic() {
+static void statistic()
+{
   IFNDEF(CONFIG_TARGET_AM, setlocale(LC_NUMERIC, ""));
 #define NUMBERIC_FMT MUXDEF(CONFIG_TARGET_AM, "%ld", "%'ld")
   Log("host time spent = " NUMBERIC_FMT " us", g_timer);
   Log("total guest instructions = " NUMBERIC_FMT, g_nr_guest_inst);
-  if (g_timer > 0) Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
-  else Log("Finish running in less than 1 us and can not calculate the simulation frequency");
+  if (g_timer > 0)
+    Log("simulation frequency = " NUMBERIC_FMT " inst/s", g_nr_guest_inst * 1000000 / g_timer);
+  else
+    Log("Finish running in less than 1 us and can not calculate the simulation frequency");
 }
 
-void assert_fail_msg() {
+void assert_fail_msg()
+{
   isa_reg_display();
   statistic();
 }
 
 /* Simulate how the CPU works. */
-void cpu_exec(uint64_t n) {
-  g_print_step = (n < MAX_INST_TO_PRINT);
-  switch (nemu_state.state) {
-    case NEMU_END: case NEMU_ABORT:
-      printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
-      return;
-    default: nemu_state.state = NEMU_RUNNING;
+void cpu_exec(uint64_t n)
+{
+  printf("hsay:in cpu_exec()\n");         // hamza
+  printf("hsay:n=%ld\n", n);              // hamza
+  g_print_step = (n < MAX_INST_TO_PRINT); // trace_and_difftest()函数内if的判断条件
+  switch (nemu_state.state)               //开始没有设定值，所以走的是default
+  {
+  case NEMU_END:
+    printf("hsay:case NEMU_END\n"); // hamza
+    // break;
+  case NEMU_ABORT:
+    printf("Program execution has ended. To restart the program, exit NEMU and run again.\n");
+    return;
+  default:
+  {
+    printf("hsay:neme_state.state default=NEMU_RUNNING\n"); // hamza
+    nemu_state.state = NEMU_RUNNING;
+  }
   }
 
-  uint64_t timer_start = get_time();
+  uint64_t timer_start = get_time();             //记录开始时间
+  printf("hsay:timer_start=%lu\n", timer_start); // hamza
 
-  execute(n);
+  execute(n); //传入-1时do nothing
 
-  uint64_t timer_end = get_time();
-  g_timer += timer_end - timer_start;
+  uint64_t timer_end = get_time();           //记录结束时间
+  printf("hsay:timer_end=%lu\n", timer_end); // hamza
 
-  switch (nemu_state.state) {
-    case NEMU_RUNNING: nemu_state.state = NEMU_STOP; break;
+  g_timer += timer_end - timer_start;    //运行execute的时间
+  printf("hsay:g_timer=%lu\n", g_timer); // hamza
 
-    case NEMU_END: case NEMU_ABORT:
-      Log("nemu: %s at pc = " FMT_WORD,
-          (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) :
-           (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) :
-            ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
-          nemu_state.halt_pc);
-      // fall through
-    case NEMU_QUIT: statistic();
+  switch (nemu_state.state)
+  {
+  case NEMU_RUNNING:
+    nemu_state.state = NEMU_STOP;
+    break;
+
+  case NEMU_END:
+  case NEMU_ABORT:
+    Log("nemu: %s at pc = " FMT_WORD, //#define FMT_WORD MUXDEF(CONFIG_ISA64, "0x%016lx", "0x%08x")
+        (nemu_state.state == NEMU_ABORT ? ANSI_FMT("ABORT", ANSI_FG_RED) : (nemu_state.halt_ret == 0 ? ANSI_FMT("HIT GOOD TRAP", ANSI_FG_GREEN) : ANSI_FMT("HIT BAD TRAP", ANSI_FG_RED))),
+        nemu_state.halt_pc); //打印运行结果（状态和PC）
+    // fall through
+  case NEMU_QUIT:
+    statistic(); //统计运行速度
   }
 }

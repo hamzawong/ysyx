@@ -10,7 +10,7 @@ endif
 remove_quote = $(patsubst "%",%,$(1))
 
 # Extract variabls from menuconfig
-GUEST_ISA ?= $(call remove_quote,$(CONFIG_ISA))
+GUEST_ISA ?= $(call remove_quote,$(CONFIG_ISA))#define CONFIG_ISA "risc-v64"
 ENGINE ?= $(call remove_quote,$(CONFIG_ENGINE))
 NAME    = $(GUEST_ISA)-nemu-$(ENGINE)
 
@@ -31,7 +31,7 @@ CFLAGS_BUILD += $(if $(CONFIG_CC_LTO),-flto,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_DEBUG),-Og -ggdb3,)
 CFLAGS_BUILD += $(if $(CONFIG_CC_ASAN),-fsanitize=address,)
 CFLAGS_TRACE += -DITRACE_COND=$(if $(CONFIG_ITRACE_COND),$(call remove_quote,$(CONFIG_ITRACE_COND)),true)
-CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA)
+CFLAGS  += $(CFLAGS_BUILD) $(CFLAGS_TRACE) -D__GUEST_ISA__=$(GUEST_ISA) #-Dmacro=defn相当于#define macro=defn #-save-temps
 LDFLAGS += $(CFLAGS_BUILD)
 
 # Include rules for menuconfig

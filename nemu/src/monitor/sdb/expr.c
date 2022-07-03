@@ -21,9 +21,9 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-  {" +", TK_NOTYPE},    // spaces
-  {"\\+", '+'},         // plus
-  {"==", TK_EQ},        // equal
+  {" +", TK_NOTYPE},    // spaces//一个或者多个空格
+  {"\\+", '+'},         // plus//一个+号
+  {"==", TK_EQ},        // equal//=号
 };
 
 #define NR_REGEX ARRLEN(rules)
