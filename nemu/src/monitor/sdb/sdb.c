@@ -113,7 +113,11 @@ static int cmd_x(char *args)
 
 static int cmd_p(char *args)
 {
-  printf("cmd_p\n");
+  printf("hsay: in cmd_p()\n");
+  /* extract the first argument */
+  char *arg = strtok(NULL, " "); // strtok()继续使用的时候，str必须写NULL
+  bool *success = false;         //不知道这个什么意思，随便加上的
+  expr(arg, success);
   return 0;
 }
 
