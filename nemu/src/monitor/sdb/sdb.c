@@ -4,9 +4,9 @@
 #include <readline/history.h>
 #include "sdb.h"
 // hamza
-#include "/home/hamza/prj/ysyx-workbench/nemu/include/memory/host.h"
-#include "/home/hamza/prj/ysyx-workbench/nemu/include/memory/paddr.h"
-#include "/home/hamza/prj/ysyx-workbench/nemu/include/memory/vaddr.h"
+#include "memory/host.h"
+#include "memory/paddr.h"
+#include "memory/vaddr.h"
 
 static int is_batch_mode = false;
 
@@ -42,7 +42,8 @@ static int cmd_c(char *args)
 
 static int cmd_q(char *args)
 {
-  return -1; //-1
+  nemu_state.state = NEMU_QUIT; //正常退出
+  return -1;                    //-1
 }
 /*TODO:hamza,sdb*/
 // static void execute(uint64_t n);
@@ -116,20 +117,28 @@ static int cmd_p(char *args)
   printf("hsay: in cmd_p()\n");
   /* extract the first argument */
   char *arg = strtok(NULL, " "); // strtok()继续使用的时候，str必须写NULL
-  bool *success = false;         //不知道这个什么意思，随便加上的
-  expr(arg, success);
+  bool success = false;
+  word_t x = expr(arg, &success);
+  printf("The result of expression is %ld\n", x);
   return 0;
 }
 
 static int cmd_w(char *args)
 {
-  printf("cmd_w\n");
+  bool success = false;
+  add_wp(args, &success);
+  if (!success)
+    printf("Unvalid expression\n");
   return 0;
 }
 
 static int cmd_d(char *args)
 {
   printf("cmd_d\n");
+  int n;
+  sscanf(args, "%d", &n);
+  if (!delete_wp(n))
+    printf("Watchpoint %d does not exist\n", n);
   return 0;
 }
 /*zamah*/
@@ -141,17 +150,17 @@ static struct
   const char *description;
   int (*handler)(char *); //函数指针
 } cmd_table[] = {
-    {"help", "Display informations about all supported commands", cmd_help},
-    {"c", "Continue the execution of the program", cmd_c},
-    {"q", "Exit NEMU", cmd_q},
+    {"h", "Help you use NEMU: h", cmd_help},
+    {"c", "Continue the execution of the program: c", cmd_c},
+    {"q", "Quit NEMU: q", cmd_q},
 
     /* TODO: Add more commands */
-    {"si", "Execute N cmd by single step and pause", cmd_si},
-    {"info", "Print infomation of register or watchpoint", cmd_info},
-    {"x", "Read N bytes memery begin with EXPR", cmd_x},
-    {"p", "Calculate EXPR", cmd_p},
-    {"w", "Watchpoint seting", cmd_w},
-    {"d", "Delete watchpoint", cmd_d},
+    {"s", "Single step excute and pause: s, s 3", cmd_si},
+    {"i", "Information of register or watchpoint: i r, i w", cmd_info},
+    {"x", "read N bytes memery begin with eXpression: x 10", cmd_x},
+    {"p", "calculate exPression: p 1+2", cmd_p},
+    {"w", "set Watchpoint: w $pc, w $ra", cmd_w},
+    {"d", "Delete watchpoint: d 0", cmd_d},
 
 };
 
@@ -168,7 +177,7 @@ static int cmd_help(char *args)
     /* no argument given */
     for (i = 0; i < NR_CMD; i++)
     {
-      printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
+      printf("%s\t%s\n", cmd_table[i].name, cmd_table[i].description);
     }
   }
   else
@@ -191,7 +200,7 @@ void sdb_set_batch_mode()
   is_batch_mode = true;
 }
 
-void sdb_mainloop()
+void sdb_mainloop() //输入命令
 {
   if (is_batch_mode) //在parse_args()处有-b则运行sdb_set_batch_mode()
   {
@@ -200,56 +209,55 @@ void sdb_mainloop()
     return;
   }
   else
-    printf("hsay:is_batch_mode = flase\n");
-
-  for (char *str; (str = rl_gets()) != NULL;) //接收输入字符串
-  {
-    char *str_end = str + strlen(str); // str表示首地址，*str_end指向str的尾地址后一位。
-
-    /* extract the first token as the command */
-    char *cmd = strtok(str, " ");   //以空格为分界将字符串分解，返回第一个字符串得到命令cmd
-    printf("hsay:cmd = %s\n", cmd); //打印cmd
-    if (cmd == NULL)
+    // printf("hsay:is_batch_mode = flase\n");
+    for (char *str; (str = rl_gets()) != NULL;) //接收输入字符串
     {
-      continue;
-    } //若无输入则重新等待输入，continue到for
+      char *str_end = str + strlen(str); // str表示首地址，*str_end指向str的尾地址后一位。
 
-    /* treat the remaining string as the arguments,
-     * which may need further parsing
-     */
-    char *args = cmd + strlen(cmd) + 1; //*args指向cmd尾地址后两位
+      /* extract the first token as the command */
+      char *cmd = strtok(str, " ");   //以空格为分界将字符串分解，返回第一个字符串得到命令cmd
+      printf("hsay:cmd = %s\n", cmd); //打印cmd
+      if (cmd == NULL)
+      {
+        continue; //若无输入则重新等待输入//continue到for
+      }
 
-    if (args >= str_end) //如果args大于等于str_end说明后面没有args
-    {
-      args = NULL;
-    }
+      /* treat the remaining string as the arguments,
+       * which may need further parsing
+       */
+      char *args = cmd + strlen(cmd) + 1; //*args指向cmd尾地址后两位
+
+      if (args >= str_end) //如果args大于等于str_end说明后面没有args
+      {
+        args = NULL;
+      }
 
 #ifdef CONFIG_DEVICE
-    extern void sdl_clear_event_queue();
-    sdl_clear_event_queue();
+      extern void sdl_clear_event_queue();
+      sdl_clear_event_queue();
 #endif
 
-    int i;
-    for (i = 0; i < NR_CMD; i++)
-    {
-      if (strcmp(cmd, cmd_table[i].name) == 0) //匹配命令//strcmp：相当于str1-str2，0相等，负数，正数
+      int i;
+      for (i = 0; i < NR_CMD; i++)
       {
-        if (cmd_table[i].handler(args) < 0) // handler：函数指针，运行cmd_help,cmd_si...等命令
+        if (strcmp(cmd, cmd_table[i].name) == 0) //匹配命令//strcmp：相当于str1-str2，0相等，负数，正数
         {
-          return; //表示直接结束程序，不返回任何值//cmd_q会返回-1，则退出sdb_mainloop()
+          if (cmd_table[i].handler(args) < 0) // handler：函数指针，运行cmd_help,cmd_si...等命令
+          {
+            return; //表示直接结束程序，不返回任何值//cmd_q会返回-1，则退出sdb_mainloop()
+          }
+          break;
         }
-        break;
+      }
+
+      if (i == NR_CMD) //超过CMD列表数，未找到命令
+      {
+        printf("Unknown command '%s'\n", cmd);
       }
     }
-
-    if (i == NR_CMD) //超过CMD列表数，未找到命令
-    {
-      printf("Unknown command '%s'\n", cmd);
-    }
-  }
 }
 
-void init_sdb()
+void init_sdb() //初始化正则表达式和监视点
 {
   /* Compile the regular expressions. */
   init_regex(); //初始化正则表达式
