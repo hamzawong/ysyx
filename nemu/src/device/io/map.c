@@ -2,7 +2,7 @@
  * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
  * @Date: 2022-06-22 10:48:43
  * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
- * @LastEditTime: 2022-07-01 11:17:02
+ * @LastEditTime: 2022-07-26 15:25:30
  * @FilePath: /ysyx-workbench/nemu/src/device/io/map.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -50,18 +50,18 @@ static void invoke_callback(io_callback_t c, paddr_t offset, int len, bool is_wr
 
 void init_map()
 {
-  io_space = malloc(IO_SPACE_MAX);
+  io_space = malloc(IO_SPACE_MAX); //申请2M空间
   assert(io_space);
   p_space = io_space;
 }
 
 word_t map_read(paddr_t addr, int len, IOMap *map)
 {
-  assert(len >= 1 && len <= 8);
-  check_bound(map, addr);
-  paddr_t offset = addr - map->low;
+  assert(len >= 1 && len <= 8);                       //长度应为1byte-8bytes之间：8bits-64bits
+  check_bound(map, addr);                             // 检查map是否为null或者addr超出map的space都会assert
+  paddr_t offset = addr - map->low;                   // addr对low的偏移
   invoke_callback(map->callback, offset, len, false); // prepare data to read
-  word_t ret = host_read(map->space + offset, len);
+  word_t ret = host_read(map->space + offset, len);   //读出map中寄存器的值
   return ret;
 }
 

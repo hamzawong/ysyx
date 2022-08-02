@@ -1,3 +1,11 @@
+/*
+ * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @Date: 2022-06-22 10:48:43
+ * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @LastEditTime: 2022-07-23 22:31:57
+ * @FilePath: /nemu/include/macro.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #ifndef __MACRO_H__
 #define __MACRO_H__
 
@@ -14,7 +22,7 @@
 #define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 
 // macro concatenation
-#define concat_temp(x, y) x ## y
+#define concat_temp(x, y) x##y
 #define concat(x, y) concat_temp(x, y)
 #define concat3(x, y, z) concat(concat(x, y), z)
 #define concat4(x, y, z, w) concat3(concat(x, y), z, w)
@@ -26,15 +34,15 @@
 #define MUX_WITH_COMMA(contain_comma, a, b) CHOOSE2nd(contain_comma a, b)
 #define MUX_MACRO_PROPERTY(p, macro, a, b) MUX_WITH_COMMA(concat(p, macro), a, b)
 // define placeholders for some property
-#define __P_DEF_0  X,
-#define __P_DEF_1  X,
-#define __P_ONE_1  X,
+#define __P_DEF_0 X,
+#define __P_DEF_1 X,
+#define __P_ONE_1 X,
 #define __P_ZERO_0 X,
 // define some selection functions based on the properties of BOOLEAN macro
-#define MUXDEF(macro, X, Y)  MUX_MACRO_PROPERTY(__P_DEF_, macro, X, Y)
+#define MUXDEF(macro, X, Y) MUX_MACRO_PROPERTY(__P_DEF_, macro, X, Y)
 #define MUXNDEF(macro, X, Y) MUX_MACRO_PROPERTY(__P_DEF_, macro, Y, X)
-#define MUXONE(macro, X, Y)  MUX_MACRO_PROPERTY(__P_ONE_, macro, X, Y)
-#define MUXZERO(macro, X, Y) MUX_MACRO_PROPERTY(__P_ZERO_,macro, X, Y)
+#define MUXONE(macro, X, Y) MUX_MACRO_PROPERTY(__P_ONE_, macro, X, Y)
+#define MUXZERO(macro, X, Y) MUX_MACRO_PROPERTY(__P_ZERO_, macro, X, Y)
 
 // test if a boolean macro is defined
 #define ISDEF(macro) MUXDEF(macro, 1, 0)
@@ -68,17 +76,17 @@
 // NOTE2: each element in the container can be a tuple
 #define MAP(c, f) c(f)
 
-#define BITMASK(bits) ((1ull << (bits)) - 1)
+#define BITMASK(bits) ((1ull << (bits)) - 1)                       // 1左移(bits)位，再减1//结果有bits个1//1ull-64bits
 #define BITS(x, hi, lo) (((x) >> (lo)) & BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog
-#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
+#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })                                         //位域
 
-#define ROUNDUP(a, sz)   ((((uintptr_t)a) + (sz) - 1) & ~((sz) - 1))
-#define ROUNDDOWN(a, sz) ((((uintptr_t)a)) & ~((sz) - 1))
+#define ROUNDUP(a, sz) ((((uintptr_t)a) + (sz)-1) & ~((sz)-1))
+#define ROUNDDOWN(a, sz) ((((uintptr_t)a)) & ~((sz)-1))
 
 #define PG_ALIGN __attribute((aligned(4096)))
 
 #if !defined(likely)
-#define likely(cond)   __builtin_expect(cond, 1)
+#define likely(cond) __builtin_expect(cond, 1)
 #define unlikely(cond) __builtin_expect(cond, 0)
 #endif
 

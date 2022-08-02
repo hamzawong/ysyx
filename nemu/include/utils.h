@@ -2,7 +2,7 @@
  * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
  * @Date: 2022-06-22 10:48:43
  * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
- * @LastEditTime: 2022-06-29 14:58:00
+ * @LastEditTime: 2022-07-18 10:52:17
  * @FilePath: /ysyx-workbench/nemu/include/utils.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AEz
  */
@@ -25,7 +25,7 @@ enum
 typedef struct
 {
   int state;         //状态
-  vaddr_t halt_pc;   //虚拟地址
+  vaddr_t halt_pc;   //停止的指针
   uint32_t halt_ret; //??
 } NEMUState;
 

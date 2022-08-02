@@ -1,3 +1,11 @@
+/*
+ * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @Date: 2022-06-22 10:49:39
+ * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @LastEditTime: 2022-07-27 10:22:50
+ * @FilePath: /ysyx-workbench/abstract-machine/am/include/amdev.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #ifndef __AMDEV_H__
 #define __AMDEV_H__
 
@@ -5,7 +13,7 @@
 
 #define AM_DEVREG(id, reg, perm, ...) \
   enum { AM_##reg = (id) }; \
-  typedef struct { __VA_ARGS__; } AM_##reg##_T;
+  typedef struct { __VA_ARGS__; } AM_##reg##_T;//寄存器结构
 
 AM_DEVREG( 1, UART_CONFIG,  RD, bool present);
 AM_DEVREG( 2, UART_TX,      WR, char data);
