@@ -74,9 +74,7 @@ static int cmd_info(char *args)
   char *arg = strtok(NULL, " "); // strtok()继续使用的时候，str必须写NULL
   if (*arg == 'r')
   {
-    printf("hsay:before isa_reg_display()\n");
     isa_reg_display();
-    printf("hsay:after isa_reg_display()\n");
     return 0;
   }
   else if (*arg == 'w')

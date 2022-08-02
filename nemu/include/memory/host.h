@@ -19,8 +19,8 @@ static inline word_t host_read(void *addr, int len)
     return *(uint8_t *)addr;
   case 2:
     return *(uint16_t *)addr;
-  case 4: // len=4
-    return *(uint32_t *)addr;
+  case 4:                     // len=4
+    return *(uint32_t *)addr; //把地址转成指针，再取值
     IFDEF(CONFIG_ISA64, case 8
           : return *(uint64_t *)addr);
   default:

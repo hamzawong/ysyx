@@ -2,7 +2,7 @@
  * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
  * @Date: 2022-06-22 10:48:43
  * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
- * @LastEditTime: 2022-07-01 11:14:13
+ * @LastEditTime: 2022-07-26 21:52:21
  * @FilePath: /ysyx-workbench/nemu/include/device/map.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -12,6 +12,7 @@
 #include <cpu/difftest.h>
 
 typedef void (*io_callback_t)(uint32_t, int, bool);
+
 uint8_t *new_space(int size);
 
 typedef struct
@@ -34,9 +35,9 @@ static inline int find_mapid_by_addr(IOMap *maps, int size, paddr_t addr)
   int i;
   for (i = 0; i < size; i++)
   {
-    if (map_inside(maps + i, addr)) // addr是否在low-hign中
+    if (map_inside(maps + i, addr)) // addr在第几个maps的空间中
     {
-      difftest_skip_ref(); // is_skip_ref = true;
+      difftest_skip_ref(); // is_skip_ref设为1。//由于状态机视角下的nemu状态不唯一，所以跳过difftest
       return i;
     }
   }

@@ -2,7 +2,7 @@
  * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
  * @Date: 2022-06-22 10:48:43
  * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
- * @LastEditTime: 2022-07-01 11:06:46
+ * @LastEditTime: 2022-07-26 15:40:04
  * @FilePath: /ysyx-workbench/nemu/src/device/io/mmio.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -15,8 +15,8 @@ static int nr_map = 0;
 
 static IOMap *fetch_mmio_map(paddr_t addr)
 {
-  int mapid = find_mapid_by_addr(maps, nr_map, addr);
-  return (mapid == -1 ? NULL : &maps[mapid]);
+  int mapid = find_mapid_by_addr(maps, nr_map, addr); //找到map的ID
+  return (mapid == -1 ? NULL : &maps[mapid]);         //返回需要读写的maps的地址
 }
 
 /* device interface */

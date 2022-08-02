@@ -31,4 +31,7 @@ config MEM_RANDOM
   help
     This may help to find undefined behaviors.
 
+config MTRACE
+  bool "Enable mtrace"
+
 endmenu #MEMORY

@@ -1,3 +1,11 @@
+/*
+ * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @Date: 2022-06-22 10:48:43
+ * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @LastEditTime: 2022-07-20 16:25:59
+ * @FilePath: /ysyx-workbench/nemu/src/utils/disasm.cc
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -85,5 +93,6 @@ extern "C" void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int
   int skip = s.find_first_not_of('\t');
   const char *p = s.c_str() + skip;
   assert((int)s.length() - skip < size);
-  strcpy(str, p);
+  strcpy(str, p);//str为汇编指令
+  // printf("str=%s\n",str);
 }

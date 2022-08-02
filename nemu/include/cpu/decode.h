@@ -1,3 +1,11 @@
+/*
+ * @Author: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @Date: 2022-06-22 10:48:43
+ * @LastEditors: 2022041439-Huang Wenhan huangwenhan@126.com
+ * @LastEditTime: 2022-07-16 18:44:58
+ * @FilePath: /nemu/include/cpu/decode.h
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #ifndef __CPU_DECODE_H__
 #define __CPU_DECODE_H__
 
@@ -8,7 +16,7 @@ typedef struct Decode {
   vaddr_t snpc; // static next pc
   vaddr_t dnpc; // dynamic next pc
   ISADecodeInfo isa;
-  IFDEF(CONFIG_ITRACE, char logbuf[128]);
+  IFDEF(CONFIG_ITRACE, char logbuf[128]);//CONFIG_ITRACE=1
 } Decode;
 
 // --- pattern matching mechanism ---
